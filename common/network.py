@@ -2,8 +2,8 @@ import argparse
 import logging
 import socket
 
-_RASPBERRYPI_HOSTNAME = 'raspberrypi.local'
-_PORT = 7771
+RASPBERRYPI_HOSTNAME = 'raspberrypi.local'
+PORT = 7771
 
 _logger = logging.getLogger(__name__)
 
@@ -59,12 +59,12 @@ def _main():
 
     if args.mode == 'c':
         # Run as client.
-        client = UDPClient(ip=_RASPBERRYPI_HOSTNAME, port=_PORT)
+        client = UDPClient(ip=RASPBERRYPI_HOSTNAME, port=PORT)
         client.send('Hello Pi!')
         client.close()
     elif args.mode == 's':
         # Run as server.
-        server = UDPServer(ip=_RASPBERRYPI_HOSTNAME, port=_PORT)
+        server = UDPServer(ip=RASPBERRYPI_HOSTNAME, port=PORT)
         try:
             for data in server.receive():
                 print(data)
