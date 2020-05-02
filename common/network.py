@@ -1,6 +1,9 @@
+import argparse
 import logging
 import socket
 
+_RASPBERRYPI_HOSTNAME = 'raspberrypi.local'
+_PORT = 7771
 
 _logger = logging.getLogger(__name__)
 
@@ -20,7 +23,7 @@ class _UDPSocket:
         _logger.info('UDP socket closed')
 
 
-class UDPServer(_UDPSocket):
+class UDPClient(_UDPSocket):
 
     def send(self, data):
         encoded_bytes = bytes(data, self._ENCODING)
@@ -30,12 +33,12 @@ class UDPServer(_UDPSocket):
                       'to {}:{}'.format(num_sent_bytes, self._ip, self._port))
 
 
-class UDPClient(_UDPSocket):
+class UDPServer(_UDPSocket):
 
     def __init__(self, ip, port):
         super().__init__(ip, port)
         self._socket.bind((ip, port))
-        _logger.info('UDP Client bound to {}:{}'.format(self._ip, self._port))
+        _logger.info('UDP Server bound to {}:{}'.format(self._ip, self._port))
 
     def receive(self):
         while True:
@@ -45,3 +48,31 @@ class UDPClient(_UDPSocket):
                           'from {}'.format(len(encoded_data), from_address))
             data = encoded_data.decode(self._ENCODING)
             yield data
+
+
+def _main():
+    parser = argparse.ArgumentParser(description='Try out the network module.')
+    parser.add_argument('mode',
+                        choices=['c', 's'],
+                        help='Run as client (c) or server (s)')
+    args = parser.parse_args()
+
+    if args.mode == 'c':
+        # Run as client.
+        client = UDPClient(ip=_RASPBERRYPI_HOSTNAME, port=_PORT)
+        client.send('Hello Pi!')
+        client.close()
+    elif args.mode == 's':
+        # Run as server.
+        server = UDPServer(ip=_RASPBERRYPI_HOSTNAME, port=_PORT)
+        try:
+            for data in server.receive():
+                print(data)
+        except KeyboardInterrupt:
+            server.close()
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
+    _logger = logging.getLogger(__name__)
+    _main()
