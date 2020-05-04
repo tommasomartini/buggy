@@ -10,7 +10,7 @@ _logger = logging.getLogger(__name__)
 
 class _UDPSocket:
 
-    _BUFFER_SIZE = 1024
+    _BUFFER_SIZE = 2048
 
     def __init__(self, ip, port):
         self._ip = ip
