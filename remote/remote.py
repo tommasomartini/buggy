@@ -9,6 +9,8 @@ _BW_KEY = keyboard.Key.down
 _L_KEY = keyboard.Key.left
 _R_KEY = keyboard.Key.right
 
+_STRING_ENCODING = 'utf-8'
+
 
 def _main():
     _logger.info('Start remote')
@@ -18,13 +20,17 @@ def _main():
 
     def _on_press(key):
         if key == _FW_KEY:
-            client.send('f')
+            data_str = 'f'
         elif key == _BW_KEY:
-            client.send('b')
+            data_str = 'b'
         elif key == _L_KEY:
-            client.send('l')
+            data_str = 'l'
         elif key == _R_KEY:
-            client.send('r')
+            data_str = 'r'
+        else:
+            return
+
+        client.send(bytes(data_str, _STRING_ENCODING))
 
     def _on_release(key):
         if key == keyboard.Key.esc:
@@ -32,7 +38,8 @@ def _main():
 
         if key in (_FW_KEY, _BW_KEY, _L_KEY, _R_KEY):
             # Send a stop signal.
-            client.send('s')
+            data_str = 's'
+            client.send(bytes(data_str, _STRING_ENCODING))
 
     with keyboard.Listener(on_press=_on_press,
                            on_release=_on_release) as listener:

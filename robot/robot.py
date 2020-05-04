@@ -4,6 +4,8 @@ from gpiozero import Robot
 
 import common.network as network
 
+_STRING_ENCODING = 'utf-8'
+
 
 def _main():
     _logger.info('Start robot')
@@ -16,23 +18,24 @@ def _main():
 
     try:
         for data in server.receive():
-            if data == 'f' and not is_moving:
+            data_str = data.decode(_STRING_ENCODING)
+            if data_str == 'f' and not is_moving:
                 is_moving = True
                 robot.forward()
 
-            elif data == 'b' and not is_moving:
+            elif data_str == 'b' and not is_moving:
                 is_moving = True
                 robot.backward()
 
-            elif data == 'l' and not is_moving:
+            elif data_str == 'l' and not is_moving:
                 is_moving = True
                 robot.left()
 
-            elif data == 'r' and not is_moving:
+            elif data_str == 'r' and not is_moving:
                 is_moving = True
                 robot.right()
 
-            elif data == 's':
+            elif data_str == 's':
                 is_moving = False
                 robot.stop()
 

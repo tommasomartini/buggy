@@ -4,7 +4,6 @@ import socket
 
 RASPBERRYPI_HOSTNAME = 'raspberrypi.local'
 PORT = 7771
-ENCODING = 'utf-8'
 
 _logger = logging.getLogger(__name__)
 
@@ -12,7 +11,6 @@ _logger = logging.getLogger(__name__)
 class _UDPSocket:
 
     _BUFFER_SIZE = 1024
-
 
     def __init__(self, ip, port):
         self._ip = ip
@@ -27,9 +25,7 @@ class _UDPSocket:
 class UDPClient(_UDPSocket):
 
     def send(self, data):
-        encoded_bytes = bytes(data, ENCODING)
-        num_sent_bytes = \
-            self._socket.sendto(encoded_bytes, (self._ip, self._port))
+        num_sent_bytes = self._socket.sendto(data, (self._ip, self._port))
         _logger.debug('Sent {} bytes '
                       'to {}:{}'.format(num_sent_bytes, self._ip, self._port))
 
@@ -43,11 +39,9 @@ class UDPServer(_UDPSocket):
 
     def receive(self):
         while True:
-            encoded_data, from_address = \
-                self._socket.recvfrom(self._BUFFER_SIZE)
+            data, from_address = self._socket.recvfrom(self._BUFFER_SIZE)
             _logger.debug('Received {} bytes '
-                          'from {}'.format(len(encoded_data), from_address))
-            data = encoded_data.decode(ENCODING)
+                          'from {}'.format(len(data), from_address))
             yield data
 
 
@@ -61,14 +55,14 @@ def _main():
     if args.mode == 'c':
         # Run as client.
         client = UDPClient(ip=RASPBERRYPI_HOSTNAME, port=PORT)
-        client.send('Hello Pi!')
+        client.send(bytes('Hello Pi!', 'utf-8'))
         client.close()
     elif args.mode == 's':
         # Run as server.
         server = UDPServer(ip=RASPBERRYPI_HOSTNAME, port=PORT)
         try:
             for data in server.receive():
-                print(data)
+                print(data.decode('utf-8'))
         except KeyboardInterrupt:
             server.close()
 
