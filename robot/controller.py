@@ -31,18 +31,34 @@ robot = Robot(left=(18, 12), right=(19, 13))
 
 
 def move():
-    return
-    
     # Evaluate the commands provided and set the motors.
-    if sum(_keys[:4]) == 0:
+    if sum(_commands[:4]) == 0:
         # Nothing to do.
         robot.stop()
         return
 
-    # direction = 
-    # Move forward. But how fast?
-    speed = 0.5 + _keys[1] * 0.5
-    robot.forward(speed)
+    # Setting both "forward" and "backward" or "left" and "right" not allowed.
+    # Maintain the current course.
+    if (_commands[0] and _commands[1]) or (_commands[2] and _commands[3]):
+        return
+
+    speed = 1.0 if _commands[4] else 0.5
+
+    if not _commands[0] and not _commands[1]:
+        # Only left-right provided.
+        mv_func = robot.left if _commands[2] else robot.right
+        mv_func(speed)
+    else:
+        mv_func = robot.forward if _commands[0] else robot.backward
+
+        # Any lateral movement?
+        kwargs = dict(speed=speed)
+        if _commands[2]:
+            kwargs['curve_left'] = 0.5
+        elif _commands[3]:
+            kwargs['curve_right'] = 0.5
+
+        mv_func(**kwargs)
 
 
 def _on_press(key):
