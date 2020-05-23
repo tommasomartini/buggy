@@ -1,3 +1,14 @@
+"""Base class to control them motors by providing single commands.
+
+Example (drive forward for one second and then stop):
+    import time
+    driver = Driver()
+    driver.set_command(COMMAND_FORWARD, 1)
+    time.sleep(1)
+    driver.set_command(COMMAND_FORWARD, 0)
+    driver.close()
+"""
+
 import logging
 import threading
 
@@ -161,4 +172,6 @@ class Driver:
         return self._dismiss_safety_stop_event
 
     def close(self):
+        self._robot.stop()
         self._robot.close()
+        _logger.debug('Shut down {}'.format(self.__class__.__name__))
