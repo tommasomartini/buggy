@@ -46,6 +46,7 @@ class KeyboardDriver(driver.Driver):
             _logger.info('Keyboard listener started.')
             print(_instructions)
             listener.join()
+        self.close()
 
     def _on_press(self, key):
         command = _key_to_command.get(key)
@@ -55,7 +56,7 @@ class KeyboardDriver(driver.Driver):
     def _on_release(self, key):
         if key == _EXIT_KEY:
             _logger.debug('Captured exit signal')
-            self.close()
+            return False
 
         command = _key_to_command.get(key)
         if command is not None:
