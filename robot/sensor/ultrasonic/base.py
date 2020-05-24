@@ -13,6 +13,10 @@ _logger = logging.getLogger(__name__)
 _SPEED_OF_SOUND_mps = 343.26    # m/s
 
 
+class _TimeoutError(Exception):
+    pass
+
+
 class BaseUltrasonicSensor:
     """Implements the basic functionality to use an ultrasonic distance sensor
     like the common HC-SR04.
@@ -48,6 +52,9 @@ class BaseUltrasonicSensor:
     # We experienced some freezing when using the nominal interval. We allow for
     # some slack time between consecutive measurements.
     _MEASURE_INTERVAL_FACTOR = 1.2
+
+    # How long to wait before giving up waiting for the signal back, in seconds.
+    _TIMEOUT_s = 1.0
 
     # Name id.
     _id = 0
@@ -90,27 +97,33 @@ class BaseUltrasonicSensor:
 
     def read(self):
         """Cycles forever yielding distance measurements in cm.
-
-        Note:
-            This implementation uses busy-waiting, which is usually very
-            computationally expensive.
-            TODO: switch to GPIO's event dispatcher.
         """
         while True:
-            # Generate a trigger pulse.
             self._pulse()
+            try:
+                channel = GPIO.wait_for_edge(self._echo_pin,
+                                             GPIO.RISING,
+                                             timeout=self._TIMEOUT_s)
+                if channel is None:
+                    raise _TimeoutError()
 
-            # Record the time when the pulse is received back.
-            while GPIO.input(self._echo_pin) is False:
-                pass
-            pulse_start = time.time()
-            while GPIO.input(self._echo_pin) is True:
-                pass
+                pulse_start = time.time()
 
-            distance_cm = (time.time() - pulse_start) \
-                          * self._PULSE_TO_DISTANCE_MULTIPLIER_cmps
+                channel = GPIO.wait_for_edge(self._echo_pin,
+                                             GPIO.FALLING,
+                                             timeout=self._TIMEOUT_s)
+                if channel is None:
+                    raise _TimeoutError()
 
-            yield distance_cm
+                pulse_end = time.time()
+
+                distance_cm = (pulse_end - pulse_start) \
+                              * self._PULSE_TO_DISTANCE_MULTIPLIER_cmps
+                yield distance_cm
+
+            except _TimeoutError:
+                _logger.warning(
+                    'Ultrasonic sensor {} timed-out'.format(self._name))
 
             time.sleep(self._measure_interval_s)
 
