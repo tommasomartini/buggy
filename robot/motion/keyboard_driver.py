@@ -40,13 +40,9 @@ class KeyboardDriver(driver.Driver):
 
     def __init__(self):
         super().__init__()
-        with keyboard.Listener(on_press=self._on_press,
-                               on_release=self._on_release,
-                               suppress=True) as listener:
-            _logger.info('Keyboard listener started.')
-            print(_instructions)
-            listener.join()
-        self.close()
+        self._listener = keyboard.Listener(on_press=self._on_press,
+                                           on_release=self._on_release,
+                                           suppress=True)
 
     def _on_press(self, key):
         command = _key_to_command.get(key)
@@ -61,3 +57,14 @@ class KeyboardDriver(driver.Driver):
         command = _key_to_command.get(key)
         if command is not None:
             self.set_command(command_code=command, command_value=0)
+
+    def run(self):
+        print(_instructions)
+        self._listener.start()
+        try:
+            self._listener.wait()
+            _logger.info('Keyboard listener started.')
+            self._listener.join()
+        finally:
+            self._listener.stop()
+        self.close()

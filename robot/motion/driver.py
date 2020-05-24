@@ -10,7 +10,7 @@ Example (drive forward for one second and then stop):
 """
 
 import logging
-import threading
+import multiprocessing as mp
 
 from gpiozero import Robot
 
@@ -57,42 +57,10 @@ class Driver:
         # safety stop condition.
         # This class has the authority to clear only the "dismiss" Event, but
         # it is up to the caller to clear the safety stop Event.
-        self._engage_safety_stop_event = threading.Event()
-        self._dismiss_safety_stop_event = threading.Event()
-
-        # This thread listens to the events notifying the need of a safety
-        # stop.
-        self._safety_stop_thread = threading.Thread(target=self._safety_stop,
-                                                    name='SafetyStopListener',
-                                                    daemon=True)
-        self._safety_stop_thread.start()
-
-    def _safety_stop(self):
-        """Listens to the Events to engage and dismiss a safety stop condition.
-        Function to be used as a Thread target.
-
-        On safety stop request, stops the robot and resets all the commands.
-        """
-        while True:
-            # Wait until the safety stop event triggers.
-            self._engage_safety_stop_event.wait()
-
-            # Immediately stop the robot.
-            self._robot.stop()
-            _logger.debug('Safety stop engaged')
-
-            # Wait until the safety stop event expires. After that, we can
-            # resume moving. Explicit call needed because the move() function
-            # is only called on status changes.
-            self._dismiss_safety_stop_event.wait()
-            self._move()
-
-            self._dismiss_safety_stop_event.clear()
-            _logger.debug('Safety stop dismissed')
+        self._engage_safety_stop_event = mp.Event()
 
     def _move(self):
         if self._engage_safety_stop_event.is_set():
-            # Maybe not needed, but double-check anyway that motors are off.
             if self._robot.left_motor != 0 or self._robot.right_motor != 0:
                 self._robot.stop()
             return
@@ -161,21 +129,12 @@ class Driver:
                             '{}'.format(command_code))
             return
 
-        if self._commands[command_code] == command_value:
-            # Command already set: no need to do anything.
-            return
-
-        # Set this command and execute.
         self._commands[command_code] = command_value
         self._move()
 
     @property
     def engage_safety_stop_event(self):
         return self._engage_safety_stop_event
-
-    @property
-    def dismiss_safety_stop_event(self):
-        return self._dismiss_safety_stop_event
 
     def close(self):
         self._robot.stop()

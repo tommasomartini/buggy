@@ -106,6 +106,9 @@ class UltrasonicSensor:
         time.sleep(self._INIT_SETUP_TIME_s)
         GPIO.output(self._trig_pin, False)
 
+        # Generate a pulse to zero-out the echo pin.
+        self._pulse()
+
         _logger.info('Ultrasonic sensor {} initialized'.format(self._name))
 
     @classmethod
@@ -134,7 +137,8 @@ class UltrasonicSensor:
 
         in_range = distance_cm <= 100 * self._distance_threshold_m
         if in_range == self._in_range:
-            # No status change.
+            # No status change. Note that the first time in_range is set is
+            # always detected as a status change.
             return
 
         # Detected a status change.
@@ -161,6 +165,7 @@ class UltrasonicSensor:
                                              GPIO.RISING,
                                              timeout=timeout_ms)
                 if channel is None:
+                    _logger.debug('Waiting for HIGH timed out')
                     raise _TimeoutError()
 
                 pulse_start = time.time()
@@ -168,6 +173,7 @@ class UltrasonicSensor:
                                              GPIO.FALLING,
                                              timeout=timeout_ms)
                 if channel is None:
+                    _logger.debug('Waiting for LOW timed out')
                     raise _TimeoutError()
 
                 pulse_end = time.time()
