@@ -56,9 +56,8 @@ class BaseUltrasonicSensor:
     # some slack time between consecutive measurements.
     _MEASURE_INTERVAL_FACTOR = 1.2
 
-    # How long to wait before giving up waiting for the signal back,
-    # in milliseconds.
-    _TIMEOUT_ms = 1000
+    # How long to wait before giving up waiting for the signal back, in seconds.
+    _TIMEOUT_s = 1
 
     # Name id.
     _id = 0
@@ -102,12 +101,14 @@ class BaseUltrasonicSensor:
     def read(self):
         """Cycles forever yielding distance measurements in cm.
         """
+        # The GPIO library requires ms as units.
+        timeout_ms = int(1000 * self._TIMEOUT_s)
         while True:
             self._pulse()
             try:
                 channel = GPIO.wait_for_edge(self._echo_pin,
                                              GPIO.RISING,
-                                             timeout=self._TIMEOUT_ms)
+                                             timeout=timeout_ms)
                 if channel is None:
                     raise _TimeoutError()
 
@@ -115,7 +116,7 @@ class BaseUltrasonicSensor:
 
                 channel = GPIO.wait_for_edge(self._echo_pin,
                                              GPIO.FALLING,
-                                             timeout=self._TIMEOUT_ms)
+                                             timeout=timeout_ms)
                 if channel is None:
                     raise _TimeoutError()
 
