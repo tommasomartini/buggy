@@ -1,7 +1,10 @@
 """This module provides a base ultrasonic sensor class which provides the same
-basic functionality of the DistanceSensor class in gpiozero. We had to implement
-our own class to be able to drive multiple distance sensor with the same trigger
-pin and thus save resources.
+basic functionality of the DistanceSensor class in gpiozero.
+We had to implement our own class for two reasons:
+* the PlayKnowLogy ultrasonic sensor seems to behave slightly differently than
+  the standard HC-SR04, hence it is not compatible with the gpiozero class;
+* we want to able to drive multiple sensors simultaneously using the same
+  trigger pin to save resources.
 """
 import logging
 import time
