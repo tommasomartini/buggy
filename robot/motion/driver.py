@@ -74,19 +74,29 @@ class Driver:
         On safety stop request, stops the robot and resets all the commands.
         """
         while True:
+            # Wait until the safety stop event triggers.
             self._engage_safety_stop_event.wait()
 
-            # Stop the robot and reset all the commands.
+            # Immediately stop the robot.
             self._robot.stop()
-            for idx in range(len(self._commands)):
-                self._commands[idx] = 0
             _logger.debug('Safety stop engaged')
 
+            # Wait until the safety stop event expires. After that, we can
+            # resume moving. Explicit call needed because the move() function
+            # is only called on status changes.
             self._dismiss_safety_stop_event.wait()
+            self._move()
+
             self._dismiss_safety_stop_event.clear()
             _logger.debug('Safety stop dismissed')
 
     def _move(self):
+        if self._engage_safety_stop_event.is_set():
+            # Maybe not needed, but double-check anyway that motors are off.
+            if self._robot.left_motor != 0 or self._robot.right_motor != 0:
+                self._robot.stop()
+            return
+
         _logger.debug('Execute commands: {}'.format(self._commands))
 
         if sum(self._commands[:4]) == 0:
@@ -145,10 +155,6 @@ class Driver:
             command_value (int): The value associated with this command. Many
                 times it is a 1 to set or a 0 to cancel it.
         """
-        if self._engage_safety_stop_event.is_set():
-            # Ignore every command until it is safe to proceed.
-            return
-
         if command_code < 0 or command_code >= len(self._commands):
             # Unrecognized command.
             _logger.warning('Unrecognized command code: '
