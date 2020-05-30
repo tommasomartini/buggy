@@ -67,4 +67,6 @@ class KeyboardDriver(driver.Driver):
             self._listener.join()
         finally:
             self._listener.stop()
+
         self.close()
+        _logger.info('Keyboard listener stopped.')

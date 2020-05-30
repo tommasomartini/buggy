@@ -76,8 +76,6 @@ def _main():
     front_safety_device_process.terminate()
     rear_safety_device_process.terminate()
 
-    driver.close()
-
     print('Bye')
 
 
