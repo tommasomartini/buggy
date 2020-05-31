@@ -9,7 +9,7 @@ import robot.sensor.ultrasonic as ultrasonic
 
 logging.basicConfig(level=logging.DEBUG,
                     style='{',
-                    format='[{threadName}][{name}][{levelname}] {message}')
+                    format='[{processName}][{name}][{levelname}] {message}')
 _logger = logging.getLogger(__name__)
 
 _ULTRASONIC_SENSOR_FRONT_TRIG_PIN = 11
@@ -85,12 +85,14 @@ def _main():
         front_safety_device_process = mp.Process(
             target=_start_front_distance_sensor,
             args=(driver.engage_safety_stop_event,),
+            name='FrontSafetyStop',
             daemon=True)
         front_safety_device_process.start()
 
         rear_safety_device_process = mp.Process(
             target=_start_rear_distance_sensor,
             args=(driver.engage_safety_stop_event,),
+            name='RearSafetyStop',
             daemon=True)
         rear_safety_device_process.start()
 
