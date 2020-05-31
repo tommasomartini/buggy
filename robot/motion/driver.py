@@ -52,16 +52,31 @@ class Driver:
                             right=(_RIGHT_MOTOR_POS_PIN,
                                    _RIGHT_MOTOR_NEG_PIN))
 
-        # A Driver exposes two Events objects that external objects can use
-        # to signal the need of an emergency stops and the cease of the
-        # safety stop condition.
-        # This class has the authority to clear only the "dismiss" Event, but
-        # it is up to the caller to clear the safety stop Event.
-        self._engage_safety_stop_event = mp.Event()
+        # A Driver exposes a number of multiprocess Events objects that
+        # external objects can use to signal the need of an emergency stops.
+        # It is up to the caller to clear the safety stop Event.
+        self._safety_stop_event = mp.Event()
+        self._safety_stop_forward_event = mp.Event()
+        self._safety_stop_backward_event = mp.Event()
 
     def _move(self):
-        if self._engage_safety_stop_event.is_set():
-            if self._robot.left_motor != 0 or self._robot.right_motor != 0:
+        if self._safety_stop_event.is_set():
+            if self._robot.left_motor.is_active or self._robot.right_motor.is_active:
+                # Both motors must be completely still.
+                self._robot.stop()
+            return
+
+        if self._safety_stop_forward_event.is_set():
+            if self._robot.left_motor.value > 0 and self._robot.right_motor.value > 0:
+                # Motors cannot go forward at the same time. At most one can
+                # spin forward to allow a rotation.
+                self._robot.stop()
+            return
+
+        if self._safety_stop_backward_event.is_set():
+            if self._robot.left_motor.value < 0 and self._robot.right_motor.value < 0:
+                # Motors cannot go backward at the same time. At most one can
+                # spin backward to allow a rotation.
                 self._robot.stop()
             return
 
@@ -133,8 +148,16 @@ class Driver:
         self._move()
 
     @property
-    def engage_safety_stop_event(self):
-        return self._engage_safety_stop_event
+    def safety_stop_event(self):
+        return self._safety_stop_event
+
+    @property
+    def safety_stop_forward_event(self):
+        return self._safety_stop_forward_event
+
+    @property
+    def safety_stop_backward_event(self):
+        return self._safety_stop_backward_event
 
     def close(self):
         self._robot.stop()
