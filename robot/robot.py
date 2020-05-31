@@ -84,14 +84,14 @@ def _main():
     try:
         front_safety_device_process = mp.Process(
             target=_start_front_distance_sensor,
-            args=(driver.engage_safety_stop_event,),
+            args=(driver.safety_stop_forward_event,),
             name='FrontSafetyStop',
             daemon=True)
         front_safety_device_process.start()
 
         rear_safety_device_process = mp.Process(
             target=_start_rear_distance_sensor,
-            args=(driver.engage_safety_stop_event,),
+            args=(driver.safety_stop_backward_event,),
             name='RearSafetyStop',
             daemon=True)
         rear_safety_device_process.start()
