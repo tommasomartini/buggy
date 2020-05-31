@@ -64,21 +64,22 @@ class Driver:
             if self._robot.left_motor.is_active or self._robot.right_motor.is_active:
                 # Both motors must be completely still.
                 self._robot.stop()
+
+            # Not further actions allowed in case of full safety stop.
             return
 
+        # In case of forward/backward safety stop, motors cannot spin in the
+        # same forbidden direction. At most one is allowed to let the robot
+        # spin in place.
         if self._safety_stop_forward_event.is_set():
             if self._robot.left_motor.value > 0 and self._robot.right_motor.value > 0:
-                # Motors cannot go forward at the same time. At most one can
-                # spin forward to allow a rotation.
                 self._robot.stop()
-            return
+                return
 
         if self._safety_stop_backward_event.is_set():
             if self._robot.left_motor.value < 0 and self._robot.right_motor.value < 0:
-                # Motors cannot go backward at the same time. At most one can
-                # spin backward to allow a rotation.
                 self._robot.stop()
-            return
+                return
 
         _logger.debug('Execute commands: {}'.format(self._commands))
 
@@ -124,9 +125,15 @@ class Driver:
             # We already checked that forward and backward cannot
             # be set together.
             if self._commands[COMMAND_FORWARD]:
+                if self._safety_stop_forward_event.is_set():
+                    _logger.debug('Cannot execute: forward safety stop set')
+                    return
                 self._robot.forward(**kwargs)
                 _logger.debug('Move forward with arguments: {}'.format(kwargs))
             elif self._commands[COMMAND_BACKWARD]:
+                if self._safety_stop_backward_event.is_set():
+                    _logger.debug('Cannot execute: backward safety stop set')
+                    return
                 self._robot.backward(**kwargs)
                 _logger.debug('Move backward with arguments: {}'.format(kwargs))
 
@@ -145,6 +152,13 @@ class Driver:
             return
 
         self._commands[command_code] = command_value
+        self._move()
+
+    def stop(self):
+        """Stops all the motors at the same time.
+        """
+        for idx in range(len(self._commands)):
+            self._commands[idx] = 0
         self._move()
 
     @property
