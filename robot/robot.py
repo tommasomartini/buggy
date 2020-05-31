@@ -1,5 +1,6 @@
 import logging
 import multiprocessing as mp
+import signal
 
 import robot.components.ultrasonic_sensors.hc_sr04 as hc_sr04
 import robot.components.ultrasonic_sensors.playknowlogy as playknowlogy
@@ -29,9 +30,22 @@ def _start_front_distance_sensor(event):
         when_out_of_range=lambda: event.clear(),
         name='Front',
     )
-    while True:
+
+    stop = False
+
+    def _stop(signum, frame):
+        nonlocal stop
+        _logger.debug('Front safety process received signal {}'.format(signum))
+        stop = True
+
+    signal.signal(signal.SIGTERM, _stop)
+    while not stop:
         for _ in front_distance_sensor.read():
-            pass
+            if stop:
+                break
+
+    front_distance_sensor.close()
+    _logger.debug('Front safety device properly stopped')
 
 
 def _start_rear_distance_sensor(event):
@@ -46,9 +60,22 @@ def _start_rear_distance_sensor(event):
         when_out_of_range=lambda: event.clear(),
         name='Rear',
     )
-    while True:
+
+    stop = False
+
+    def _stop(signum, frame):
+        nonlocal stop
+        _logger.debug('Rear safety process received signal {}'.format(signum))
+        stop = True
+
+    signal.signal(signal.SIGTERM, _stop)
+    while not stop:
         for _ in rear_distance_sensor.read():
-            pass
+            if stop:
+                break
+
+        rear_distance_sensor.close()
+    _logger.debug('Rear safety device properly stopped')
 
 
 def _main():
@@ -75,6 +102,9 @@ def _main():
 
     front_safety_device_process.terminate()
     rear_safety_device_process.terminate()
+
+    front_safety_device_process.join()
+    rear_safety_device_process.join()
 
     print('Bye')
 
