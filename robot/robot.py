@@ -74,7 +74,7 @@ def _start_rear_distance_sensor(event):
             if stop:
                 break
 
-        rear_distance_sensor.close()
+    rear_distance_sensor.close()
     _logger.debug('Rear safety device properly stopped')
 
 
