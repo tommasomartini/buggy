@@ -4,13 +4,12 @@ import socket
 
 RASPBERRYPI_HOSTNAME = 'raspberrypi.local'
 PORT = 7771
+BUFFER_SIZE = 1024
 
 _logger = logging.getLogger(__name__)
 
 
 class _UDPSocket:
-
-    _BUFFER_SIZE = 2048
 
     def __init__(self, ip, port):
         self._ip = ip
@@ -39,7 +38,7 @@ class UDPServer(_UDPSocket):
 
     def receive(self):
         while True:
-            data, from_address = self._socket.recvfrom(self._BUFFER_SIZE)
+            data, from_address = self._socket.recvfrom(BUFFER_SIZE)
             _logger.debug('Received {} bytes '
                           'from {}'.format(len(data), from_address))
             yield data
