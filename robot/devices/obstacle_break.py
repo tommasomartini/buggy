@@ -95,9 +95,11 @@ class ObstacleBreak:
             self._obstacle_detection_process_front.start()
             self._obstacle_detection_process_rear.start()
         finally:
-            self.stop()
+            self.close()
 
-    def stop(self):
+        _logger.debug('{} started'.format(self.__class__.__name__))
+
+    def close(self):
         self._obstacle_detection_process_front.terminate()
         self._obstacle_detection_process_rear.terminate()
 
