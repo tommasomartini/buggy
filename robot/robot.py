@@ -1,7 +1,8 @@
 import logging
 
 import robot.devices.obstacle_break as ob
-import robot.motion.keyboard_driver as keyboard_driver
+import robot.devices.remote as remote
+import robot.motion.driver as dvr
 
 logging.basicConfig(level=logging.DEBUG,
                     style='{',
@@ -10,20 +11,20 @@ _logger = logging.getLogger(__name__)
 
 
 def _main():
-    driver = keyboard_driver.KeyboardDriver()
+    driver = dvr.Driver()
     obstacle_break = ob.ObstacleBreak(driver=driver, distance_m=0.1)
+    remote_receiver = remote.RemoteReceiver(driver=driver)
 
     try:
         obstacle_break.run()
-
-        # The driver will block: call it last.
-        driver.run()
+        remote_receiver.run()
     except KeyboardInterrupt:
         pass
 
     obstacle_break.close()
+    driver.close()
 
-    print('Bye')
+    print('Buggy correctly stopped.')
 
 
 if __name__ == '__main__':
