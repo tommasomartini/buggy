@@ -19,10 +19,10 @@ _logger = logging.getLogger(__name__)
 # The Raspberry Pi 4B provides only 4 pins with hardware-driven PWM and these
 # are pins 12, 13, 18 and 19. However, pins 12-18 and 13-19 are driven by
 # the same modulator, therefore we group them together.
-_LEFT_MOTOR_POS_PIN = 12
-_LEFT_MOTOR_NEG_PIN = 18
-_RIGHT_MOTOR_POS_PIN = 19
-_RIGHT_MOTOR_NEG_PIN = 13
+_LEFT_MOTOR_POS_PIN = 19
+_LEFT_MOTOR_NEG_PIN = 13
+_RIGHT_MOTOR_POS_PIN = 12
+_RIGHT_MOTOR_NEG_PIN = 18
 
 # Codes to pilot the driver.
 COMMAND_FORWARD = 0
