@@ -20,7 +20,7 @@ class RemoteReceiver:
     # the receiver. If data is not received for a large enough interval,
     # the receiver will interpret it as a communication breakdown and will
     # stop the motors automatically.
-    _NO_SIGNAL_RECEIVED_TIMEOUT_s = 1.0
+    _NO_SIGNAL_RECEIVED_TIMEOUT_s = 0.1
 
     def __init__(self, driver, status_led):
         self._driver = driver
