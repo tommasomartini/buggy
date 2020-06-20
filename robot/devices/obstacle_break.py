@@ -79,16 +79,16 @@ class ObstacleBreak:
         )
 
         self._obstacle_detection_process_front = \
-            mp.Process(target=_detect_obstacle(
-                distance_sensor=self._front_sensor),
-                name='ObstacleDetectionFront',
-                daemon=True)
+            mp.Process(target=_detect_obstacle,
+                       args=(self._front_sensor,),
+                       name='ObstacleDetectionFront',
+                       daemon=True)
 
         self._obstacle_detection_process_rear = \
-            mp.Process(target=_detect_obstacle(
-                distance_sensor=self._rear_sensor),
-                name='ObstacleDetectionRear',
-                daemon=True)
+            mp.Process(target=_detect_obstacle,
+                       args=(self._rear_sensor,),
+                       name='ObstacleDetectionRear',
+                       daemon=True)
 
     def run(self):
         try:
