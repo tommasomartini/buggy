@@ -2,6 +2,7 @@ import logging
 import signal
 
 import common.network as network
+import robot.devices.led_status as ls
 import robot.devices.remote.common as common
 import robot.motion.driver as dvr
 
@@ -21,17 +22,21 @@ class RemoteReceiver:
     # stop the motors automatically.
     _NO_SIGNAL_RECEIVED_TIMEOUT_s = 1.0
 
-    def __init__(self, driver):
+    def __init__(self, driver, status_led):
         self._driver = driver
+        self._status_led = status_led
         self._server = network.UDPServer(ip=network.RASPBERRYPI_HOSTNAME,
                                          port=network.PORT)
 
         signal.signal(signal.SIGALRM, self._on_timeout)
 
+        self._status_led.set(ls.Status.WAITING_FOR_REMOTE)
+
     def _on_timeout(self):
         _logger.warning('Signal from remote stopped unexpectedly: '
                         'stop the motors')
         self._driver.stop()
+        self._status_led.set(ls.Status.WAITING_FOR_REMOTE)
 
     def run(self):
         _logger.debug('{} started'.format(self.__class__.__name__))
@@ -75,9 +80,14 @@ class RemoteReceiver:
                                  self._NO_SIGNAL_RECEIVED_TIMEOUT_s,
                                  0)
 
+                self._status_led.set(ls.Status.READING_REMOTE)
+
         finally:
             # Disable the alarm.
             signal.setitimer(signal.ITIMER_REAL, 0, 0)
             self._server.close()
 
         _logger.debug('{} stopped'.format(self.__class__.__name__))
+
+    def close(self):
+        self._server.close()
