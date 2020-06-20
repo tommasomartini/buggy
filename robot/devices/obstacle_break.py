@@ -94,8 +94,9 @@ class ObstacleBreak:
         try:
             self._obstacle_detection_process_front.start()
             self._obstacle_detection_process_rear.start()
-        finally:
+        except Exception:
             self.close()
+            raise
 
         _logger.debug('{} started'.format(self.__class__.__name__))
 
