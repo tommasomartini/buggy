@@ -37,8 +37,7 @@ class StatusLed:
             self._led.on()
 
         else:
-            self._led.blink(on_time=blinking_time_s,
-                            off_time=blinking_time_s)
+            self._led.blink(on_time=blinking_time_s)
 
     def close(self):
         self._led.off()

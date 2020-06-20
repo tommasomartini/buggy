@@ -32,7 +32,7 @@ class RemoteReceiver:
 
         self._status_led.set(ls.Status.WAITING_FOR_REMOTE)
 
-    def _on_timeout(self, signum, frame):
+    def _on_timeout(self):
         _logger.warning('Signal from remote stopped unexpectedly: '
                         'stop the motors')
         self._driver.stop()
