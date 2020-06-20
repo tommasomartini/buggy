@@ -18,10 +18,10 @@ def _main():
     args = parser.parse_args()
 
     if args.auto:
-        robot.robot.run()
+        robot.robot.run(autopilot=True)
 
     else:
-        robot.robot.run()
+        robot.robot.run(autopilot=False)
 
 
 if __name__ == '__main__':

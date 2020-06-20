@@ -1,6 +1,7 @@
 import logging
 
 import robot.devices.led_status as ls
+import robot.devices.line_navigator as ln
 import robot.devices.obstacle_break as ob
 import robot.devices.remote.remote_receiver as rr
 import robot.motion.driver as dvr
@@ -8,22 +9,30 @@ import robot.motion.driver as dvr
 _logger = logging.getLogger(__name__)
 
 
-def run():
+def run(autopilot):
     driver = dvr.Driver()
     obstacle_break = ob.ObstacleBreak(driver=driver, distance_m=0.1)
     status_led = ls.StatusLed()
-    remote_receiver = rr.RemoteReceiver(driver=driver,
-                                        status_led=status_led)
 
-    try:
+    if autopilot:
+        line_navigator = ln.LineNavigator(driver=driver,
+                                          status_led=status_led,
+                                          black_track=True)
         obstacle_break.run()
-        remote_receiver.run()
-    except KeyboardInterrupt:
-        pass
+        line_navigator.run()
 
-    remote_receiver.close()
-    obstacle_break.close()
+    else:
+        remote_receiver = rr.RemoteReceiver(driver=driver,
+                                            status_led=status_led)
+        try:
+            obstacle_break.run()
+            remote_receiver.run()
+        except KeyboardInterrupt:
+            pass
+        remote_receiver.close()
+
     status_led.close()
+    obstacle_break.close()
     driver.close()
 
     print('Buggy correctly stopped.')
