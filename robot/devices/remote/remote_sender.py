@@ -11,6 +11,7 @@ _logger = logging.getLogger(__name__)
 _instructions = """Press ESC to quit.
 Use the arrow keys to move.
 Hold shift for turbo.
+Press 'q' to shut down the robot (but not the remote).
 """
 
 
@@ -23,19 +24,21 @@ class RemoteSender:
     def __init__(self):
         self._client = network.UDPClient(ip=network.RASPBERRYPI_HOSTNAME,
                                          port=network.PORT)
+        _logger.debug('{} initialized'.format(self.__class__.__name__))
 
     def _on_press(self, key):
-        data_byte = common.key_bindings.get(key, None)
+        data_byte = common.key_bindings.get(key, (None, None))[0]
         if data_byte is not None:
-            self._client.send(data_byte[0])
+            self._client.send(data_byte)
 
     def _on_release(self, key):
         if key == keyboard.Key.esc:
+            # Note that this will shut down the remote but not the robot!
             return False
 
-        data_byte = common.key_bindings.get(key, None)
+        data_byte = common.key_bindings.get(key, (None, None))[1]
         if data_byte is not None:
-            self._client.send(data_byte[1])
+            self._client.send(data_byte)
 
     def run(self):
         _logger.debug('{} started'.format(self.__class__.__name__))
@@ -51,7 +54,5 @@ class RemoteSender:
             listener.join()
         finally:
             listener.stop()
-
-        self._client.close()
-
-        _logger.debug('{} stopped'.format(self.__class__.__name__))
+            self._client.close()
+            _logger.debug('{} stopped'.format(self.__class__.__name__))

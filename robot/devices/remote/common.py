@@ -18,6 +18,8 @@ class Commands:
     SHUTDOWN = b's'
 
 
+# Maps a key to a pair of commands to send respectively when pressing or
+# releasing the associated key.
 key_bindings = {
     keyboard.Key.up: (Commands.FORWARD_ON,
                       Commands.FORWARD_OFF),
@@ -29,5 +31,5 @@ key_bindings = {
                          Commands.RIGHT_OFF),
     keyboard.Key.shift: (Commands.TURBO_ON,
                          Commands.TURBO_OFF),
-    keyboard.KeyCode.from_char('q'): (Commands.SHUTDOWN, ),
+    keyboard.KeyCode.from_char('q'): (None, Commands.SHUTDOWN),
 }
