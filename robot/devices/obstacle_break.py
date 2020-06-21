@@ -37,6 +37,7 @@ def _obstacle_detected_callback(event):
 
 def _clear_way_callback(event):
     def _f(_distance_cm):
+        _logger.debug('Clear way')
         event.clear()
 
     return _f

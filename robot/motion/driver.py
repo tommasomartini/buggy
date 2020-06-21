@@ -83,35 +83,27 @@ class Driver:
                 self._robot.stop()
                 return
 
-        _logger.debug('Execute commands: {}'.format(self._commands))
-
         if sum(self._commands[:4]) == 0:
             # All the motion commands are unset: stop the motors.
-            _logger.debug('Stop all motors')
             self._robot.stop()
             return
 
         # Setting both "forward" and "backward" or "left" and "right"
         # is not allowed. Maintain the current course.
-        if (self._commands[COMMAND_FORWARD] and
-            self._commands[COMMAND_BACKWARD]) or \
-                (self._commands[COMMAND_LEFT] and
-                 self._commands[COMMAND_RIGHT]):
+        if (self._commands[COMMAND_FORWARD] and self._commands[COMMAND_BACKWARD]) or \
+                (self._commands[COMMAND_LEFT] and self._commands[COMMAND_RIGHT]):
             _logger.warning('Invalid command configuration')
             return
 
         speed = self._TURBO_SPEED if self._commands[COMMAND_TURBO] \
             else self._NORMAL_SPEED
 
-        if not self._commands[COMMAND_FORWARD] and \
-                not self._commands[COMMAND_BACKWARD]:
+        if not self._commands[COMMAND_FORWARD] and not self._commands[COMMAND_BACKWARD]:
             # Only left-right commands provided.
             if self._commands[COMMAND_LEFT]:
                 self._robot.left(speed)
-                _logger.debug('Turn left with speed {}'.format(speed))
             elif self._commands[COMMAND_RIGHT]:
                 self._robot.right(speed)
-                _logger.debug('Turn right with speed {}'.format(speed))
             else:
                 assert False, 'Reached unexpected condition'
         else:
@@ -124,28 +116,26 @@ class Driver:
             elif self._commands[COMMAND_RIGHT]:
                 kwargs['curve_right'] = 0.5
 
-            # We already checked that forward and backward cannot
-            # be set together.
+            # We already checked that forward and backward cannot be set together.
             if self._commands[COMMAND_FORWARD]:
                 if self._safety_stop_forward_event.is_set():
-                    _logger.debug('Cannot execute: forward safety stop set')
                     return
+
                 self._robot.forward(**kwargs)
-                _logger.debug('Move forward with arguments: {}'.format(kwargs))
+
             elif self._commands[COMMAND_BACKWARD]:
                 if self._safety_stop_backward_event.is_set():
-                    _logger.debug('Cannot execute: backward safety stop set')
                     return
+
                 self._robot.backward(**kwargs)
-                _logger.debug('Move backward with arguments: {}'.format(kwargs))
 
     def set_command(self, command_code, command_value):
         """Receives an external command, stores it and processes it.
 
         Args:
             command_code (int): What command to execute.
-            command_value (int): The value associated with this command. Many
-                times it is a 1 to set or a 0 to cancel it.
+            command_value (int): The value associated with this command. Often
+                1 to set and 0 to cancel.
         """
         if command_code < 0 or command_code >= len(self._commands):
             # Unrecognized command.
