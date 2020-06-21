@@ -59,10 +59,14 @@ class LineNavigator:
                                  command_value=True)
 
     def _left_on_track_callback(self):
+        self._driver.set_command(command_code=dvr.COMMAND_FORWARD,
+                                 command_value=False)
         self._driver.set_command(command_code=dvr.COMMAND_LEFT,
                                  command_value=True)
 
     def _right_on_track_callback(self):
+        self._driver.set_command(command_code=dvr.COMMAND_FORWARD,
+                                 command_value=False)
         self._driver.set_command(command_code=dvr.COMMAND_RIGHT,
                                  command_value=True)
 
