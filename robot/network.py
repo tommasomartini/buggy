@@ -8,6 +8,8 @@ BUFFER_SIZE = 1024
 
 _logger = logging.getLogger(__name__)
 
+_VERY_VERBOSE_LOGGING = False
+
 
 class _UDPSocket:
 
@@ -25,8 +27,10 @@ class UDPClient(_UDPSocket):
 
     def send(self, data):
         num_sent_bytes = self._socket.sendto(data, (self._ip, self._port))
-        _logger.debug('Sent {} bytes '
-                      'to {}:{}'.format(num_sent_bytes, self._ip, self._port))
+        if _VERY_VERBOSE_LOGGING:
+            _logger.debug('Sent {} bytes to {}:{}'.format(num_sent_bytes,
+                                                          self._ip,
+                                                          self._port))
 
 
 class UDPServer(_UDPSocket):
@@ -39,8 +43,9 @@ class UDPServer(_UDPSocket):
     def receive(self):
         while True:
             data, from_address = self._socket.recvfrom(BUFFER_SIZE)
-            _logger.debug('Received {} bytes '
-                          'from {}'.format(len(data), from_address))
+            if _VERY_VERBOSE_LOGGING:
+                _logger.debug('Received {} bytes '
+                              'from {}'.format(len(data), from_address))
             yield data
 
 
