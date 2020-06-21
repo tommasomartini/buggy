@@ -29,7 +29,7 @@ def _trigger_sensor_reading(distance_sensor):
 
 def _obstacle_detected_callback(event):
     def _f(distance_cm):
-        _logger.debug('Obstacle detected at {} cm'.format(distance_cm))
+        _logger.debug('Obstacle detected at {:.1f} cm'.format(distance_cm))
         event.set()
 
     return _f
