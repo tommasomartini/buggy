@@ -2,8 +2,8 @@ import logging
 
 from pynput import keyboard
 
-import common.network as network
 import robot.devices.remote.common as common
+import robot.network as network
 
 _logger = logging.getLogger(__name__)
 

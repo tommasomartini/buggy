@@ -5,7 +5,7 @@ import math
 import cv2
 import numpy as np
 
-import common.network as network
+import robot.network as network
 
 logging.basicConfig(level=logging.INFO)
 _logger = logging.getLogger(__name__)

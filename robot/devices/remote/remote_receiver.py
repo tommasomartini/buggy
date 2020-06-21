@@ -1,10 +1,10 @@
 import logging
 import signal
 
-import common.network as network
 import robot.devices.led_status as ls
 import robot.devices.remote.common as common
 import robot.motion.driver as dvr
+import robot.network as network
 
 _logger = logging.getLogger(__name__)
 
