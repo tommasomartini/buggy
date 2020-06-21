@@ -39,13 +39,15 @@ def _run_auto():
     driver = dvr.Driver()
     obstacle_break = ob.ObstacleBreak(driver=driver, distance_m=0.1)
     status_led = ls.StatusLed()
-
     line_navigator = ln.LineNavigator(driver=driver,
                                       status_led=status_led,
                                       black_track=True)
 
     try:
+        # Enable the automatic obstacle break.
         obstacle_break.run()
+
+        # Start the automatic navigator.
         line_navigator.run()
 
     except KeyboardInterrupt:

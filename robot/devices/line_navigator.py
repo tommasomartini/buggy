@@ -59,6 +59,7 @@ class LineNavigator:
                                  command_value=False)
         self._driver.set_command(command_code=dvr.COMMAND_FORWARD,
                                  command_value=True)
+        _logger.debug('No line detected: go straight ahead')
 
     def _left_on_track_callback(self):
         # Sharp turn to left.
@@ -66,6 +67,7 @@ class LineNavigator:
                                  command_value=False)
         self._driver.set_command(command_code=dvr.COMMAND_LEFT,
                                  command_value=True)
+        _logger.debug('Adjust left')
 
     def _right_on_track_callback(self):
         # Sharp turn to right.
@@ -73,6 +75,7 @@ class LineNavigator:
                                  command_value=False)
         self._driver.set_command(command_code=dvr.COMMAND_RIGHT,
                                  command_value=True)
+        _logger.debug('Adjust right')
 
     def _both_on_track_callback(self):
         self._driver.stop()
