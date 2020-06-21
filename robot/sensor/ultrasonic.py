@@ -145,13 +145,13 @@ class UltrasonicSensor:
         self._in_range = in_range
 
         if self._in_range:
-            # Out of -> in range.
+            # Out of range -> in range.
             if self._when_in_range is not None:
-                self._when_in_range()
+                self._when_in_range(distance_cm)
         else:
-            # In -> out of range.
+            # In range -> out of range.
             if self._when_out_of_range is not None:
-                self._when_out_of_range()
+                self._when_out_of_range(distance_cm)
 
     def read(self):
         """Cycles forever yielding distance measurements in cm.

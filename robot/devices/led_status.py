@@ -25,6 +25,7 @@ class StatusLed:
     def __init__(self):
         self._led = LED(PIN)
         self._led.off()
+        _logger.debug('{} initialized'.format(self.__class__.__name__))
 
     def set(self, status):
         self._led.off()
@@ -43,3 +44,4 @@ class StatusLed:
     def close(self):
         self._led.off()
         self._led.close()
+        _logger.debug('{} stopped'.format(self.__class__.__name__))

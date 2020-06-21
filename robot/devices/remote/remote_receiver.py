@@ -32,6 +32,8 @@ class RemoteReceiver:
 
         self._status_led.set(ls.Status.WAITING_FOR_REMOTE)
 
+        _logger.debug('{} initialized'.format(self.__class__.__name__))
+
     def _on_timeout(self, signum, frame):
         _logger.warning('Signal from remote stopped unexpectedly: '
                         'stop the motors')
@@ -43,7 +45,10 @@ class RemoteReceiver:
 
         try:
             for data_byte in self._server.receive():
-                if data_byte == common.Commands.FORWARD_ON:
+                if data_byte == common.Commands.SHUTDOWN:
+                    self._driver.stop()
+                    break
+                elif data_byte == common.Commands.FORWARD_ON:
                     self._driver.set_command(command_code=dvr.COMMAND_FORWARD,
                                              command_value=True)
                 elif data_byte == common.Commands.FORWARD_OFF:
@@ -83,11 +88,11 @@ class RemoteReceiver:
                 self._status_led.set(ls.Status.READING_REMOTE)
 
         finally:
-            # Disable the alarm.
-            signal.setitimer(signal.ITIMER_REAL, 0, 0)
-            self._server.close()
+            # If anything happens, make sure to shut things down properly.
+            self._close()
 
-        _logger.debug('{} stopped'.format(self.__class__.__name__))
-
-    def close(self):
+    def _close(self):
+        # Cancel the alarm.
+        signal.setitimer(signal.ITIMER_REAL, 0, 0)
         self._server.close()
+        _logger.debug('{} stopped'.format(self.__class__.__name__))

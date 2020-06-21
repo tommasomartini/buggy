@@ -15,6 +15,7 @@ class Commands:
     RIGHT_OFF = b'r'
     TURBO_ON = b'T'
     TURBO_OFF = b't'
+    SHUTDOWN = b's'
 
 
 key_bindings = {
@@ -28,4 +29,5 @@ key_bindings = {
                          Commands.RIGHT_OFF),
     keyboard.Key.shift: (Commands.TURBO_ON,
                          Commands.TURBO_OFF),
+    keyboard.KeyCode.from_char('q'): (Commands.SHUTDOWN, ),
 }

@@ -59,6 +59,8 @@ class Driver:
         self._safety_stop_forward_event = mp.Event()
         self._safety_stop_backward_event = mp.Event()
 
+        _logger.debug('{} initialized'.format(self.__class__.__name__))
+
     def _move(self):
         if self._safety_stop_event.is_set():
             if self._robot.left_motor.is_active or self._robot.right_motor.is_active:
@@ -176,4 +178,4 @@ class Driver:
     def close(self):
         self._robot.stop()
         self._robot.close()
-        _logger.debug('Shut down {}'.format(self.__class__.__name__))
+        _logger.debug('{} stopped'.format(self.__class__.__name__))
