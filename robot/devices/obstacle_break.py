@@ -23,7 +23,10 @@ def _trigger_sensor_reading(distance_sensor):
         distance_sensor (:obj:`UltrasonicSensor`): Ultrasonic distance sensor
             to read.
     """
-    for _ in distance_sensor.read():
+    try:
+        for _ in distance_sensor.read():
+            pass
+    except KeyboardInterrupt:
         pass
 
 
