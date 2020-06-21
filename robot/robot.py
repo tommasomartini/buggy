@@ -43,14 +43,22 @@ def _run_auto():
     line_navigator = ln.LineNavigator(driver=driver,
                                       status_led=status_led,
                                       black_track=True)
-    obstacle_break.run()
-    line_navigator.run()
 
-    status_led.close()
-    obstacle_break.close()
-    driver.close()
+    try:
+        obstacle_break.run()
+        line_navigator.run()
 
-    print('Buggy correctly stopped.')
+    except KeyboardInterrupt:
+        # Legit way to interrupt the application.
+        pass
+
+    finally:
+        line_navigator.close()
+        status_led.close()
+        obstacle_break.close()
+        driver.close()
+
+        print('Buggy correctly stopped.')
 
 
 def run(autopilot):

@@ -17,7 +17,7 @@ _logger = logging.getLogger(__name__)
 class LineNavigator:
 
     # Time interval between subsequent sensor readings.
-    _FRAME_RATE_s = 0.001
+    _FRAME_RATE_s = 100e-6      # 100 us
 
     class _State(enum.Enum):
         LEFT_ON_TRACK = 0
@@ -49,6 +49,8 @@ class LineNavigator:
 
         self._status_led.set(ls.Status.AUTOPILOT)
 
+        _logger.info('{} initialized'.format(self.__class__.__name__))
+
     def _none_on_track_callback(self):
         # Reset forward direction.
         self._driver.set_command(command_code=dvr.COMMAND_RIGHT,
@@ -59,12 +61,14 @@ class LineNavigator:
                                  command_value=True)
 
     def _left_on_track_callback(self):
+        # Sharp turn to left.
         self._driver.set_command(command_code=dvr.COMMAND_FORWARD,
                                  command_value=False)
         self._driver.set_command(command_code=dvr.COMMAND_LEFT,
                                  command_value=True)
 
     def _right_on_track_callback(self):
+        # Sharp turn to right.
         self._driver.set_command(command_code=dvr.COMMAND_FORWARD,
                                  command_value=False)
         self._driver.set_command(command_code=dvr.COMMAND_RIGHT,
@@ -79,44 +83,36 @@ class LineNavigator:
         self._driver.set_command(command_code=dvr.COMMAND_FORWARD,
                                  command_value=True)
 
-        try:
-            while True:
+        while True:
 
-                # Active sensor means that the track was detected.
-                if self._black_track:
-                    left = not self._sensor_left.is_active
-                    right = not self._sensor_right.is_active
-                else:
-                    left = self._sensor_left.is_active
-                    right = self._sensor_right.is_active
+            # Active sensor means that the track was detected.
+            if self._black_track:
+                left = not self._sensor_left.is_active
+                right = not self._sensor_right.is_active
+            else:
+                left = self._sensor_left.is_active
+                right = self._sensor_right.is_active
 
-                if left and right:
-                    new_state = self._State.BOTH_ON_TRACK
+            if left and right:
+                self._state = self._State.BOTH_ON_TRACK
 
-                elif left and not right:
-                    new_state = self._State.LEFT_ON_TRACK
+            elif left and not right:
+                self._state = self._State.LEFT_ON_TRACK
 
-                elif not left and right:
-                    new_state = self._State.RIGHT_ON_TRACK
+            elif not left and right:
+                self._state = self._State.RIGHT_ON_TRACK
 
-                else:
-                    new_state = self._State.NONE_ON_TRACK
+            else:
+                self._state = self._State.NONE_ON_TRACK
 
-                if new_state != self._state:
-                    self._state = new_state
-                    callback = self._callbacks[self._state]
-                    if callback is not None:
-                        callback()
+            callback = self._callbacks[self._state]
+            if callback is not None:
+                callback()
 
-                time.sleep(self._FRAME_RATE_s)
-
-        except KeyboardInterrupt:
-            pass
-
-        finally:
-            self.close()
+            time.sleep(self._FRAME_RATE_s)
 
     def close(self):
+        self._driver.stop()
         self._sensor_left.close()
         self._sensor_right.close()
-        _logger.info('{} closed'.format(self.__class__.__name__))
+        _logger.info('{} stopped'.format(self.__class__.__name__))
